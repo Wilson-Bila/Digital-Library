@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Listar de Usuários</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Usuários</h1>
+
+    <div class="table-wrapper">
+      <table id="tabelaUsuarios" class="styled-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Conteúdo inserido dinamicamente via JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="button-container">
+      <a href="Cadastro_Usuario.html" class="btn-voltar">Voltar</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarUsuarios();
+    });
+
+    async function carregarUsuarios() {
+      try {
+        const resposta = await fetch('http://localhost:8080/api/usuarios');
+        if (!resposta.ok) throw new Error('Erro ao buscar usuários');
+        const usuarios = await resposta.json();
+        const tabela = document.querySelector('#tabelaUsuarios tbody');
+        tabela.innerHTML = '';
+        usuarios.forEach(u => {
+          const linha = `
+            <tr>
+              <td>${u.id}</td>
+              <td>${u.nomeCompleto}</td>
+              <td>${u.email}</td>
+            </tr>`;
+          tabela.innerHTML += linha;
+        });
+      } catch (e) {
+        alert('Erro: ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

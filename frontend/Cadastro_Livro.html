@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Cadastro Livro</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!--===============================================================================================-->	
+  <link rel="icon" type="image/png" href="images/icons/favicon.ico"/>
+</head>
+<body>
+  <div class="container">
+    <!-- Title section -->
+    <div class="title">Cadastro</div>
+    <div class="content">
+      <!--form -->
+      <form id="livroForm">
+        <div class="user-details">
+          <!-- Input Title -->
+          <div class="input-box">
+            <span class="details">Titulo</span>
+            <input type="text" id="titulo" name="titulo" placeholder="Insira o titulo do livro" required>
+          </div>
+          <!-- Input Author -->
+          <div class="input-box">
+            <span class="details">Autor</span>
+            <input type="text" id="autor" name="autor" placeholder="Insira o nome do autor do livro" required>
+          </div>
+          <!-- Input Description -->
+          <div class="input-box">
+            <span class="details">Descricao</span>
+            <input type="text" id="descricao" name="descricao" placeholder="Insira a descricao do livro" required>
+          </div>
+          <!-- Input Category -->
+          <div class="input-box">
+            <span class="details">Categoria</span>
+            <input type="text" id="categoria" name="categoria" placeholder="Insira a categoria do livro" required>
+          </div>
+          <!-- Input Price -->
+          <div class="input-box">
+            <span class="details">Preco</span>
+            <input type="number" step="0.01" id="preco" name="preco" placeholder="Insira o preco do livro" required>
+          </div>
+        </div>
+        <!-- Submit button -->
+        <div class="button">
+          <input type="submit" value="Cadastrar">
+        </div>
+      </form>
+      <div id="mensagem"></div>
+    </div>
+  </div>
+
+  <script src="js/livroController.js"></script>
+</body>
+</html>
