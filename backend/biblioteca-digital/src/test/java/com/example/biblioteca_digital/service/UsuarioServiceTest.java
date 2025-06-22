@@ -1,18 +1,18 @@
 package com.example.biblioteca_digital.service;
 
-import com.example.biblioteca_digital.dto.UsuarioDTO;
 import com.example.biblioteca_digital.model.Usuario;
 import com.example.biblioteca_digital.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -27,156 +27,120 @@ class UsuarioServiceTest {
     private UsuarioService usuarioService;
 
     private Usuario usuario;
-    private UsuarioDTO usuarioDTO;
 
     @BeforeEach
     void setUp() {
         usuario = new Usuario();
         usuario.setId(1L);
-        usuario.setNomeCompleto("Ribeiro Moises");
-        usuario.setEmail("rmoises@gmail.com");
-        usuario.setSenha("senhaCR7123");
-
-        usuarioDTO = new UsuarioDTO();
-        usuario.setNomeCompleto("Ribeiro Moises");
-        usuario.setEmail("rmoises@gmail.com");
-        usuario.setSenha("senhaCR7123");
+        usuario.setNome("Wilson Bila");
+        usuario.setEmail("bila@email.com");
+        usuario.setSenha("senha123");
+        usuario.setSaldo(100.0);
     }
 
     @Test
-    @DisplayName("Deve retornar uma lista de usuários")
-    void listarTodosUsuarios() {
+    void salvar_DeveRetornarUsuarioSalvo() {
         // Arrange
-        when(usuarioRepository.findAll()).thenReturn(Arrays.asList(usuario));
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
         // Act
-        List<Usuario> result = usuarioService.listarTodos();
+        Usuario resultado = usuarioService.salvar(usuario);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(usuario.getEmail(), result.get(0).getEmail());
-        verify(usuarioRepository, times(1)).findAll();
-        System.out.println(result);
-        System.out.println("Teste para listar-Todos-Usuarios passou com sucesso.");
+        assertNotNull(resultado);
+        assertEquals(usuario.getId(), resultado.getId());
+        assertEquals(usuario.getNome(), resultado.getNome());
+        verify(usuarioRepository, times(1)).save(usuario);
+        System.out.println(resultado);
     }
 
     @Test
-    @DisplayName("Deve retornar OK quando o usuário existe")
-    void buscarPorIdUsuario() {
+    void listarTodos_DeveRetornarListaDeUsuarios() {
+        // Arrange
+        Usuario usuario2 = new Usuario(2L, "Cheila Souza", "cheila@email.com", "senha456", 200.0);
+        when(usuarioRepository.findAll()).thenReturn(Arrays.asList(usuario, usuario2));
+
+        // Act
+        List<Usuario> resultado = usuarioService.listarTodos();
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+        verify(usuarioRepository, times(1)).findAll();
+        System.out.println(resultado);
+    }
+
+    @Test
+    void buscarPorId_QuandoUsuarioExiste_DeveRetornarUsuario() {
         // Arrange
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
 
         // Act
-        Optional<Usuario> result = usuarioService.buscarPorId(1L);
+        Usuario resultado = usuarioService.buscarPorId(1L);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(usuario.getEmail(), result.get().getEmail());
+        assertNotNull(resultado);
+        assertEquals(usuario.getId(), resultado.getId());
         verify(usuarioRepository, times(1)).findById(1L);
-        System.out.println("Teste buscarPorId_QuandoUsuarioExiste_DeveRetornarOk passou com sucesso.");
+        System.out.println(resultado);
     }
 
     @Test
-    @DisplayName("Deve retornar NOT FOUND quando o usuário não existe")
-    void buscarPorIdRetornarVazio() {
+    void buscarPorId_QuandoUsuarioNaoExiste_DeveLancarExcecao() {
         // Arrange
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act
-        Optional<Usuario> result = usuarioService.buscarPorId(1L);
-
-        // Assert
-        assertFalse(result.isPresent());
-        verify(usuarioRepository, times(1)).findById(1L);
-        System.out.println(result);
-        System.out.println("Teste buscarPorId_RetornarNotFound passou com sucesso.");
-    }
-
-    @Test
-    @DisplayName("Deve criar um usuário com dados válidos")
-    void criar_ComDadosValidos_RetornarUsuarioCriado() {
-        // Arrange
-        when(usuarioRepository.existsByEmail(usuarioDTO.getEmail())).thenReturn(false);
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-
-        // Act
-        Usuario result = usuarioService.criar(usuarioDTO);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(usuario.getEmail(), result.getEmail());
-        verify(usuarioRepository, times(1)).existsByEmail(usuarioDTO.getEmail());
-        verify(usuarioRepository, times(1)).save(any(Usuario.class));
-        System.out.println(result);
-        System.out.println("Teste criar_ComDadosValidos_RetornarUsuarioCriado passou com sucesso.");
-    }
-
-    @Test
-    @DisplayName("Deve retornar BAD REQUEST ao tentar criar com e-mail existente")
-    void criar_ComEmailExistente_LancarExcecao() {
-        // Arrange
-        when(usuarioRepository.existsByEmail(usuarioDTO.getEmail())).thenReturn(true);
+        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class, () -> usuarioService.criar(usuarioDTO));
-        verify(usuarioRepository, times(1)).existsByEmail(usuarioDTO.getEmail());
-        verify(usuarioRepository, never()).save(any(Usuario.class));
-        System.out.println("Teste criar_ComEmailExistente_RetornarBadRequest passou com sucesso.");
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> usuarioService.buscarPorId(99L)
+        );
+
+        assertEquals("Usuário não encontrado", exception.getMessage());
+        verify(usuarioRepository, times(1)).findById(99L);
+        System.out.println("Usuario nao encontrado!");
     }
 
     @Test
-    @DisplayName("Deve actualizar usuário existente")
-    void actualizar_QuandoUsuarioExiste() {
-        // Arrange
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-
-        usuarioDTO.setNomeCompleto("Wilson Bila Actualizado");
-
-        // Act
-        Optional<Usuario> result = usuarioService.actualizar(1L, usuarioDTO);
-
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals("Wilson Bila Actualizado", result.get().getNomeCompleto());
-        verify(usuarioRepository, times(1)).findById(1L);
-        verify(usuarioRepository, times(1)).save(any(Usuario.class));
-        System.out.println(result);
-        System.out.println("Teste actualizarQuandoUsuarioExiste passou com sucesso.");
-    }
-
-    @Test
-    @DisplayName("Deve retornar NOT FOUND ao actualizar usuário inexistente")
-    void actualizarUsuarioNaoExistenteRetornarVazio() {
-        // Arrange
-        when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act
-        Optional<Usuario> result = usuarioService.actualizar(1L, usuarioDTO);
-
-        // Assert
-        assertFalse(result.isPresent());
-        verify(usuarioRepository, times(1)).findById(1L);
-        verify(usuarioRepository, never()).save(any(Usuario.class));
-        System.out.println(result);
-        System.out.println("Teste actualizar_QuandoUsuarioNaoExiste_RetornarNotFound passou com sucesso.");
-    }
-
-    @Test
-    @DisplayName("Deve remover usuário e retornar NO CONTENT")
-    void remover() {
+    void deletar_DeveChamarRepositorio() {
         // Arrange
         doNothing().when(usuarioRepository).deleteById(1L);
 
         // Act
-        usuarioService.remover(1L);
+        usuarioService.deletar(1L);
 
         // Assert
         verify(usuarioRepository, times(1)).deleteById(1L);
-        if(usuarioService.equals(true)){
-            System.out.println("NO CONTENT");
-        }
-        System.out.println("Teste remover passou com sucesso.");
+    }
+
+    @Test
+    void buscarPorEmail_QuandoUsuarioExiste_DeveRetornarUsuario() {
+        // Arrange
+        when(usuarioRepository.findByEmail("joao@email.com")).thenReturn(Optional.of(usuario));
+
+        // Act
+        Usuario resultado = usuarioService.buscarPorEmail("joao@email.com");
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(usuario.getEmail(), resultado.getEmail());
+        verify(usuarioRepository, times(1)).findByEmail("joao@email.com");
+        System.out.println(resultado);
+    }
+
+    @Test
+    void buscarPorEmail_QuandoUsuarioNaoExiste_DeveLancarExcecao() {
+        // Arrange
+        when(usuarioRepository.findByEmail("inexistente@email.com")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> usuarioService.buscarPorEmail("inexistente@email.com")
+        );
+
+        assertEquals("Usuário não encontrado", exception.getMessage());
+        verify(usuarioRepository, times(1)).findByEmail("inexistente@email.com");
+        System.out.println("Usuario nao encontrado!");
     }
 }
